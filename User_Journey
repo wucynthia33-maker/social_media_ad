@@ -1,0 +1,10 @@
+With purchase_customer as (SELECT user_id,ad_id,min(timestamp) as purchase_ts from ad_events where event_type = 'Purchase' group by user_id, ad_id)
+SELECT a.user_id, a.ad_id, a.event_type, ad.ad_platform, ad.target_interests, ad.ad_type, a.time_of_day, a.timestamp
+from ad_events a 
+Join purchase_customer p
+on a.user_id=p.user_id
+and a.ad_id=p.ad_id
+and a.timestamp<=p.purchase_ts
+Join ads ad
+on a.ad_id=ad.ad_id
+order by a.user_id, ad_id, a.timestamp;
