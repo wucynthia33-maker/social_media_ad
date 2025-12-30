@@ -1,0 +1,38 @@
+create table cost_per_conversion as 
+
+WITH campaign_ads AS (
+    SELECT
+        c.campaign_id,
+        c.total_budget,
+        COUNT(DISTINCT ad.ad_id) AS number_of_ads
+    FROM social_media_ad.raw_data.campaigns c
+    JOIN social_media_ad.raw_data.ads ad
+        ON c.campaign_id = ad.campaign_id
+    GROUP BY c.campaign_id, c.total_budget
+),
+purchase_counts AS (
+    SELECT
+        u.ad_id,
+        c.campaign_id,
+        SUM(CASE WHEN u.event_type = 'Purchase' THEN 1 ELSE 0 END) AS purchase_count
+    FROM user_journey u
+    JOIN social_media_ad.raw_data.ads ad
+        ON u.ad_id = ad.ad_id
+    JOIN social_media_ad.raw_data.campaigns c
+        ON c.campaign_id = ad.campaign_id
+    GROUP BY u.ad_id, c.campaign_id
+)
+
+SELECT
+    p.campaign_id,
+    p.ad_id,
+    ca.total_budget,
+    ca.number_of_ads,
+    round(ca.total_budget / ca.number_of_ads,2) AS budget_per_ad,
+    p.purchase_count,
+    round((ca.total_budget / ca.number_of_ads)
+        / NULLIF(p.purchase_count, 0),2) AS cost_per_conversion
+FROM purchase_counts p
+JOIN campaign_ads ca
+    ON p.campaign_id = ca.campaign_id
+ORDER BY p.campaign_id, p.ad_id;
