@@ -1,0 +1,7 @@
+Create table event_details as 
+SELECT a.*, u.user_gender,u.user_age,u.age_group,u.country,u.location,u.interests, ad.ad_platform,ad.ad_type,ad.target_gender, ad.target_age_group, ad.target_interests
+from social_media_ad.raw_data.ad_events a
+Join social_media_ad.raw_data.users u
+    on a.user_id=u.user_id
+Join social_media_ad.raw_data.ads ad
+    on a.ad_id=ad.ad_id;
