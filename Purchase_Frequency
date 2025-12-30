@@ -1,0 +1,12 @@
+create table purchase_frequency as 
+SELECT
+    c.campaign_id,
+    ROUND(COUNT(*) * 1.0 / COUNT(DISTINCT u.user_id), 2) AS purchase_frequency
+FROM user_journey u
+JOIN social_media_ad.raw_data.ads a
+    ON u.ad_id = a.ad_id
+JOIN social_media_ad.raw_data.campaigns c
+    ON a.campaign_id = c.campaign_id
+WHERE u.event_type = 'Purchase'
+GROUP BY c.campaign_id
+order by purchase_frequency desc;
