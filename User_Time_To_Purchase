@@ -1,0 +1,35 @@
+create table user_time_to_purchase as 
+SELECT
+    user_id,
+    ad_id,
+
+    MIN(CASE 
+        WHEN event_type IN ('Impression', 'Click') 
+        THEN timestamp 
+    END) AS first_touch_time,
+
+    MIN(CASE 
+        WHEN event_type = 'Purchase' 
+        THEN timestamp 
+    END) AS purchase_time,
+
+
+    -- Hours
+    DATEDIFF(
+        'hour',
+        MIN(CASE WHEN event_type IN ('Impression', 'Click') THEN timestamp END),
+        MIN(CASE WHEN event_type = 'Purchase' THEN timestamp END)
+    ) AS hours_to_purchase,
+
+    -- Days
+    DATEDIFF(
+        'day',
+        MIN(CASE WHEN event_type IN ('Impression', 'Click') THEN timestamp END),
+        MIN(CASE WHEN event_type = 'Purchase' THEN timestamp END)
+    ) AS days_to_purchase
+
+FROM user_journey
+GROUP BY user_id, ad_id
+HAVING
+    MIN(CASE WHEN event_type = 'Purchase' THEN timestamp END) IS NOT NULL
+Order by hours_to_purchase desc;
