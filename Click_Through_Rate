@@ -1,0 +1,14 @@
+create table Click_Through_Rate
+as 
+SELECT
+    ad_id,
+    ROUND(
+        100.0 * 
+        COUNT(CASE WHEN event_type = 'Click' THEN 1 END)
+        /
+        NULLIF(COUNT(CASE WHEN event_type = 'Impression' THEN 1 END), 0),
+        2
+    ) AS click_through_rate
+FROM social_media_ad.raw_data.ad_events
+GROUP BY ad_id
+order by ad_id;
